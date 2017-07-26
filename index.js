@@ -17,9 +17,5 @@ app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
 
-app.get('/Book1.csv', function (request, response) {
-    response.render('pages/Book1.csv');
-});
-
 
 
