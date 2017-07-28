@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% include ../partials/header.ejs %>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <meta charset="utf-8">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+  	<style>
+    
+      .axis text {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 10pt;
+      }
+      .axis .label {
+        font-size: 10pt;
+      }
+
+      .axis path, .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+      }
+
+      .x.axis text {
+        font-size: 10pt;
+      }
+	  
+    #tooltip {
+    opacity: 0;
+    position: absolute;
+    text-align: center;
+    background: white;
+    border: 0px;
+    }
+    </style>
+ </head>
+ <body>
+	<div id="tooltip"></div>
+    <script>
+      var outerWidth = 760;
+      var outerHeight = 500;
+      var margin = { left: 90, top: 16, right: 30, bottom: 85 };
+      var barPadding = 0.2;
+
+      var xColumn = "EmployerName";
+      var yColumn = "Count";
+      var colorColumn = "EmployerName";
+
+      var innerWidth  = outerWidth  - margin.left - margin.right;
+      var innerHeight = outerHeight - margin.top  - margin.bottom;
+
+      var svg = d3.select("body").append("svg")
+        .attr("width",  outerWidth)
+        .attr("height", outerHeight);
+      var g = svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      var xAxisG = g.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + innerHeight + ")");
+      var yAxisG = g.append("g")
+        .attr("class", "y axis");
+
+      var xScale = d3.scale.ordinal().rangeBands([0, innerWidth], barPadding);
+      var yScale = d3.scale.linear().range([innerHeight, 0]);
+      var colorScale = d3.scale.category20();
+	  // colorScale = d3.scale.ordinal().range(["green", "lightgreen", "orange", "red"]);
+
+      
+	  var tooltip = d3.select("#tooltip");
+
+      var xAxis = d3.svg.axis().scale(xScale).orient("bottom")
+        .outerTickSize(0);
+      var yAxis = d3.svg.axis().scale(yScale).orient("left")
+        .ticks(5)
+        .outerTickSize(0);
+
+      function render(data){
+
+        xScale.domain(data.map( function (d){ return d[xColumn]; }));
+        yScale.domain([0, d3.max(data, function (d){ return d[yColumn]; })]);
+        colorScale.domain(data.map(function (d){ return d[colorColumn]; }));
+
+        // xAxisG.call(xAxis)
+          
+
+        yAxisG.call(yAxis);
+
+        var bars = g.selectAll("rect").data(data);
+        bars.enter().append("rect")
+          .attr("width", xScale.rangeBand());
+        bars
+          .attr("x", function (d){ return xScale(d[xColumn]); })
+          .attr("y", function (d){ return yScale(d[yColumn]); })
+          .attr("height", function (d){ return innerHeight - yScale(d[yColumn]); })
+          .attr("fill", function (d){ return colorScale(d[colorColumn]); });
+		bars.on("mouseover", function(d) {
+        tooltip.style("opacity", 1)
+               .style("left",(d3.event.pageX)+"px")
+               .style("top",(d3.event.pageY)+"px")
+               .html("Employer:"+d[xColumn]+",count:"+d[yColumn]);
+        })
+        .on("mouseout", function() { tooltip.style("opacity", 0) })
+
+        bars.exit().remove();
+      }
+
+      function type(d){
+        d.Count = +d.Count;
+        return d;
+      }
+
+      d3.csv("barchart_2.csv", type, render);
+
+    </script>
+</body>
+</html>
