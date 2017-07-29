@@ -10,7 +10,7 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
 app.get('/', function(request, response) {
-  response.render('pages/barchart2');
+  response.render('pages/boxplot');
 });
 
 app.listen(app.get('port'), function() {
