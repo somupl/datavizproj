@@ -35,10 +35,8 @@
 
 
 	<!-- Modernizr JS -->
+	<script src="https://d3js.org/d3.v4.js"></script>
 	<script src="js/modernizr-2.6.2.min.js"></script>
-	<script src="https://d3js.org/d3.v4.min.js"></script>
-    <meta charset="utf-8">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 	<!-- FOR IE9 below -->
 	<!--[if lt IE 9]>
 	<script src="js/respond.min.js"></script>
@@ -48,6 +46,7 @@
       .axis text {
         font-family: 'Open Sans', sans-serif;
         font-size: 10pt;
+		stroke: #FFFFFF;
       }
       .axis .label {
         font-size: 10pt;
@@ -55,26 +54,27 @@
 
       .axis path, .axis line {
         fill: none;
-        stroke: #000;
+        stroke: #FFFFFF;
         shape-rendering: crispEdges;
       }
 
       .x.axis text {
         font-size: 10pt;
+		stroke: #FFFFFF;
       }
 	  
     #tooltip {
-    opacity: 0;
     position: absolute;
-    text-align: center;
-    width: 60px; height: 20px;
-    background: white;
-    border: 0px;
+	text-align: center;
+    }
+	
+	#tooltip2 {
+	position: absolute;
+	text-align: center;
     }
     </style>
 	</head>
 	<body>
-
 	<div id="fh5co-container">
 		<div id="fh5co-home" class="js-fullheight" data-section="home">
 
@@ -182,6 +182,82 @@
 				<div class="row text-center fh5co-heading row-padded">
 					<div class="col-md-8 col-md-offset-2">
 						<h2 class="heading to-animate">LCA Application Status</h2>
+						<div id="tooltip"></div>
+						<div id="barchart1"></div>
+						<script>
+							  var outerWidth = 760;
+							  var outerHeight = 500;
+							  var margin = { left: 90, top: 16, right: 30, bottom: 85 };
+							  var barPadding = 0.2;
+
+							  var xColumn = "CaseStatus";
+							  var yColumn = "Percentage";
+							  var colorColumn = "CaseStatus";
+
+							  var innerWidth  = outerWidth  - margin.left - margin.right;
+							  var innerHeight = outerHeight - margin.top  - margin.bottom;
+
+							  var svg = d3.select("#barchart1").append("svg")
+								.attr("width",  outerWidth)
+								.attr("height", outerHeight);
+							  var g = svg.append("g")
+								.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+							  var xAxisG = g.append("g")
+								.attr("class", "x axis")
+								.attr("transform", "translate(0," + innerHeight + ")");
+							  var yAxisG = g.append("g")
+								.attr("class", "y axis");
+
+							  
+							  var tooltip = d3.select("#tooltip");
+
+
+							  function render(data){
+
+								var xScale = d3.scaleBand().domain(data.map( function (d){ return d[xColumn]; })).range([0, innerWidth], barPadding);
+								var yScale = d3.scaleLinear().domain([0, d3.max(data, function (d){ return d[yColumn]; })]).range([innerHeight, 0]);
+								// var colorScale = d3.scale.category20();
+								var colorScale = d3.scaleOrdinal().range(["green", "lightgreen", "orange", "red"]);
+								colorScale.domain(data.map(function (d){ return d[colorColumn]; }));
+
+								var xAxis = d3.axisBottom(xScale);
+								var yAxis = d3.axisLeft(yScale);
+							
+								xAxisG
+								  .call(xAxis)
+								  .selectAll("text")  
+								  .attr("dx", "-0.4em")
+								  .attr("dy", "1.24em")
+								  .attr("transform", "rotate(0)" );
+
+								yAxisG.call(yAxis);
+
+								var bars = g.selectAll("rect").data(data);
+								bars.enter().append("rect")
+								  .attr("width", xScale.bandwidth())
+								  .attr("x", function (d){ return xScale(d[xColumn]); })
+								  .attr("y", function (d){ return yScale(d[yColumn]); })
+								  .attr("height", function (d){ return innerHeight - yScale(d[yColumn]); })
+								  .attr("fill", function (d){ return colorScale(d[colorColumn]); })
+								  .on("mouseover", function(d) {
+								tooltip.style("opacity", 1)
+									   .style("left",(d3.event.pageX)+"px")
+									   .style("top",(d3.event.pageY)+"px")
+									   .html(+d[yColumn]+"%");
+								})
+								.on("mouseout", function() { tooltip.style("opacity", 0) })
+
+								bars.exit().remove();
+							  }
+
+							  function type(d){
+								d.population = +d.population;
+								return d;
+							  }
+
+							  d3.csv("barchart_1.csv", type, render);
+
+						</script>
 						<p class="sub-heading to-animate">About 88.7+6.7 = 95.4% of application got certified. Hence the risk is very low. </p>
 					</div>
 				</div>
@@ -190,356 +266,80 @@
 			</div>
 		</div>
 
-		<div id="fh5co-type" style="background-image: url(images/slide_3.jpg);" data-stellar-background-ratio="0.5">
-			<div class="container">
-					<div id="tooltip"></div>
-					<script>
-					  var outerWidth = 760;
-					  var outerHeight = 500;
-					  var margin = { left: 90, top: 16, right: 30, bottom: 85 };
-					  var barPadding = 0.2;
-
-					  var xColumn = "CaseStatus";
-					  var yColumn = "Percentage";
-					  var colorColumn = "CaseStatus";
-
-					  var innerWidth  = outerWidth  - margin.left - margin.right;
-					  var innerHeight = outerHeight - margin.top  - margin.bottom;
-
-					  var svg = d3.select("body").append("svg")
-						.attr("width",  outerWidth)
-						.attr("height", outerHeight);
-					  var g = svg.append("g")
-						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-					  var xAxisG = g.append("g")
-						.attr("class", "x axis")
-						.attr("transform", "translate(0," + innerHeight + ")");
-					  var yAxisG = g.append("g")
-						.attr("class", "y axis");
-
-					  var xScale = d3.scale.ordinal().rangeBands([0, innerWidth], barPadding);
-					  var yScale = d3.scale.linear().range([innerHeight, 0]);
-					  // var colorScale = d3.scale.category20();
-					  var colorScale = d3.scale.ordinal().range(["green", "lightgreen", "orange", "red"]);
-
-					  
-					  var tooltip = d3.select("#tooltip");
-
-					  var xAxis = d3.svg.axis().scale(xScale).orient("bottom")
-						.outerTickSize(0);
-					  var yAxis = d3.svg.axis().scale(yScale).orient("left")
-						.ticks(5)
-						.outerTickSize(0);
-
-					  function render(data){
-
-						xScale.domain(data.map( function (d){ return d[xColumn]; }));
-						yScale.domain([0, d3.max(data, function (d){ return d[yColumn]; })]);
-						colorScale.domain(data.map(function (d){ return d[colorColumn]; }));
-
-						xAxisG
-						  .call(xAxis)
-						  .selectAll("text")  
-						  .attr("dx", "-0.4em")
-						  .attr("dy", "1.24em")
-						  .attr("transform", "rotate(0)" );
-
-						yAxisG.call(yAxis);
-
-						var bars = g.selectAll("rect").data(data);
-						bars.enter().append("rect")
-						  .attr("width", xScale.rangeBand());
-						bars
-						  .attr("x", function (d){ return xScale(d[xColumn]); })
-						  .attr("y", function (d){ return yScale(d[yColumn]); })
-						  .attr("height", function (d){ return innerHeight - yScale(d[yColumn]); })
-						  .attr("fill", function (d){ return colorScale(d[colorColumn]); });
-						bars.on("mouseover", function(d) {
-						tooltip.style("opacity", 1)
-							   .style("left",(d3.event.pageX)+"px")
-							   .style("top",(d3.event.pageY)+"px")
-							   .html(+d[yColumn]+"%");
-						})
-						.on("mouseout", function() { tooltip.style("opacity", 0) })
-
-						bars.exit().remove();
-					  }
-
-					  function type(d){
-						d.population = +d.population;
-						return d;
-					  }
-
-					  d3.csv("barchart_1.csv", type, render);
-					</script>
-			</div>
-		</div>
-
 		<div id="fh5co-menus" data-section="menu">
 			<div class="container">
 				<div class="row text-center fh5co-heading row-padded">
 					<div class="col-md-8 col-md-offset-2">
-						<h2 class="heading to-animate">Food Menu</h2>
-						<p class="sub-heading to-animate">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
-					</div>
-				</div>
-				<div class="row row-padded">
-					<div class="col-md-6">
-						<div class="fh5co-food-menu to-animate-2">
-							<h2 class="fh5co-drinks">Drinks</h2>
-							<ul>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_5.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Pineapple Juice</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$17.50
-									</div>
-								</li>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_6.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Green Juice</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$7.99
-									</div>
-								</li>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_7.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Soft Drinks</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$12.99
-									</div>
-								</li>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_5.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Carlo Rosee Drinks</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$12.99
-									</div>
-								</li>
-							</ul>
+						<h2 class="heading to-animate">Top H1B Jobs</h2>
+						<div id="bubble">
+							<svg width="800" height="800" font-family="sans-serif" font-size="12" text-anchor="middle"></svg>
 						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="fh5co-food-menu to-animate-2">
-							<h2 class="fh5co-dishes">Steak</h2>
-							<ul>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_3.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Beef Steak</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$17.50
-									</div>
-								</li>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_4.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Tomato with Chicken</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$7.99
-									</div>
-								</li>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_2.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Sausages from Italy</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$12.99
-									</div>
-								</li>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_8.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Beef Grilled</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$12.99
-									</div>
-								</li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="fh5co-food-menu to-animate-2">
-							<h2 class="fh5co-drinks">Drinks</h2>
-							<ul>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_5.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Pineapple Juice</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$17.50
-									</div>
-								</li>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_6.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Green Juice</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$7.99
-									</div>
-								</li>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_7.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Soft Drinks</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$12.99
-									</div>
-								</li>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_5.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Carlo Rosee Drinks</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$12.99
-									</div>
-								</li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="fh5co-food-menu to-animate-2">
-							<h2 class="fh5co-dishes">Steak</h2>
-							<ul>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_3.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Beef Steak</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$17.50
-									</div>
-								</li>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_4.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Tomato with Chicken</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$7.99
-									</div>
-								</li>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_2.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Sausages from Italy</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$12.99
-									</div>
-								</li>
-								<li>
-									<div class="fh5co-food-desc">
-										<figure>
-											<img src="images/res_img_8.jpg" class="img-responsive" alt="Free HTML5 Templates by FREEHTML5.co">
-										</figure>
-										<div>
-											<h3>Beef Grilled</h3>
-											<p>Far far away, behind the word mountains.</p>
-										</div>
-									</div>
-									<div class="fh5co-food-pricing">
-										$12.99
-									</div>
-								</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-4 col-md-offset-4 text-center to-animate-2">
-						<p><a href="#" class="btn btn-primary btn-outline">More Food Menu</a></p>
+						<script>
+
+						var svg = d3.selectAll("#bubble").select("svg"),
+							width = +svg.attr("width"),
+							height = +svg.attr("height");
+
+						var format = d3.format("d");
+
+						//var color = d3.scaleOrdinal(d3.schemeCategory20c);
+						var color = d3.scaleLinear()
+									  .domain([5410, 53743])
+									  .range(["orange", "green"]);
+
+						var pack = d3.pack()
+							.size([width, height])
+							.padding(1.5);
+
+						d3.csv("bubblechart.csv", function(d) {
+						  d.value = +d.value;
+						  if (d.value) return d;
+						}, function(error, classes) {
+						  if (error) throw error;
+
+						  var root = d3.hierarchy({children: classes})
+							  .sum(function(d) { return d.value; })
+							  .each(function(d) {
+								if (id = d.data.id) {
+								  var id, i = id.lastIndexOf(".");
+								  d.id = id;
+								  d.package = id.slice(0, i);
+								  d.class = id.slice(i + 1);
+								}
+							  });
+
+						  var node = svg.selectAll(".node")
+							.data(pack(root).leaves())
+							.enter().append("g")
+							  .attr("class", "node")
+							  .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+						  node.append("circle")
+							  .attr("id", function(d) { return d.id; })
+							  .attr("r", function(d) { return d.r; })
+							  .style("fill", function(d) { return color(d.value); });
+
+						  node.append("clipPath")
+							  .attr("id", function(d) { return d.id; })
+							.append("use")
+							  .attr("xlink:href", function(d) { return "#" + d.id; });
+
+						  node.append("text")
+							.attr("clip-path", function(d) { return  d.id; })
+							.selectAll("tspan")
+							.data(function(d) { return d.class.split(/(\s+)/g); })
+							.enter().append("tspan")
+							.attr("x", 0)
+							.attr("y", function(d, i, nodes) { return 14 + (i - nodes.length / 2 - 0.5) * 10; })
+							.text(function(d) { return d; });
+
+						  node.append("title")
+							  .text(function(d) { return d.id + "\n" + "Count:" + format(d.value); });
+						});
+
+						</script>
+						<p class="sub-heading to-animate">Data Science job is not falling under top 10 H1B jobs. This is expected because datascience is emerging field. 
+						Lets deep dive and see whether this is really true. </p>
 					</div>
 				</div>
 			</div>
@@ -550,34 +350,11 @@
 			<div class="container">
 				<div class="row text-center fh5co-heading row-padded">
 					<div class="col-md-8 col-md-offset-2 to-animate">
-						<h2 class="heading">Upcoming Events</h2>
-						<p class="sub-heading">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-4">
-						<div class="fh5co-event to-animate-2">
-							<h3>Kitchen Workshops</h3>
-							<span class="fh5co-event-meta">March 19th, 2016</span>
-							<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
-							<p><a href="#" class="btn btn-primary btn-outline">Read More</a></p>
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="fh5co-event to-animate-2">
-							<h3>Music Concerts</h3>
-							<span class="fh5co-event-meta">March 19th, 2016</span>
-							<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
-							<p><a href="#" class="btn btn-primary btn-outline">Read More</a></p>
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="fh5co-event to-animate-2">
-							<h3>Free to Eat Party</h3>
-							<span class="fh5co-event-meta">March 19th, 2016</span>
-							<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
-							<p><a href="#" class="btn btn-primary btn-outline">Read More</a></p>
-						</div>
+						<h2 class="heading">Data Science Job Trends</h2>
+						
+						<p class="sub-heading">It is evident from box plots over the year 2011-2016 that the number of data science jobs are increasing exponentially. 
+						[Visually it is clear by seeing number of data points that increases year over year] Median salary fluctuates year over year [Box Plot] and there is no clear trend seen. 
+						Lower end salaries are because the data includes part time jobs.</p>
 					</div>
 				</div>
 			</div>
@@ -587,8 +364,9 @@
 			<div class="container">
 				<div class="row text-center fh5co-heading row-padded">
 					<div class="col-md-8 col-md-offset-2">
-						<h2 class="heading to-animate">Reserve a Table</h2>
-						<p class="sub-heading to-animate">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+						<h2 class="heading to-animate">Top Data Science Job Recruiters</h2>
+						<!-- grpah code goes here-->
+						<p class="sub-heading to-animate">we can clearly see mixture of retail, technology, banking sector, Life insurance and consulting companies.</p>
 					</div>
 				</div>
 				<div class="row">

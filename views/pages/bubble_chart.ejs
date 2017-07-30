@@ -1,78 +1,71 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <% include ../partials/header.ejs %>
-  <script src="https://d3js.org/d3.v4.min.js"></script>
-  
-<svg width="800" height="800" font-family="sans-serif" font-size="12" text-anchor="middle"></svg>
-<script>
 
-var svg = d3.select("svg"),
-    width = +svg.attr("width"),
-    height = +svg.attr("height");
+<script src="https://d3js.org/d3.v4.js"></script>
 
-var format = d3.format("d");
+						<svg width="800" height="800" font-family="sans-serif" font-size="12" text-anchor="middle"></svg>
+						<script>
 
-//var color = d3.scaleOrdinal(d3.schemeCategory20c);
-var color = d3.scaleLinear()
-			  .domain([5410, 53743])
-			  .range(["orange", "green"]);
+						var svg = d3.select("svg"),
+							width = +svg.attr("width"),
+							height = +svg.attr("height");
 
-var pack = d3.pack()
-    .size([width, height])
-    .padding(1.5);
+						var format = d3.format("d");
 
-d3.csv("bubblechart.csv", function(d) {
-  d.value = +d.value;
-  if (d.value) return d;
-}, function(error, classes) {
-  if (error) throw error;
+						//var color = d3.scaleOrdinal(d3.schemeCategory20c);
+						var color = d3.scaleLinear()
+									  .domain([5410, 53743])
+									  .range(["orange", "green"]);
 
-  var root = d3.hierarchy({children: classes})
-      .sum(function(d) { return d.value; })
-      .each(function(d) {
-        if (id = d.data.id) {
-          var id, i = id.lastIndexOf(".");
-          d.id = id;
-          d.package = id.slice(0, i);
-          d.class = id.slice(i + 1);
-        }
-      });
+						var pack = d3.pack()
+							.size([width, height])
+							.padding(1.5);
 
-  var node = svg.selectAll(".node")
-    .data(pack(root).leaves())
-    .enter().append("g")
-      .attr("class", "node")
-      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+						d3.csv("bubblechart.csv", function(d) {
+						  d.value = +d.value;
+						  if (d.value) return d;
+						}, function(error, classes) {
+						  if (error) throw error;
 
-  node.append("circle")
-      .attr("id", function(d) { return d.id; })
-      .attr("r", function(d) { return d.r; })
-      .style("fill", function(d) { return color(d.value); });
+						  var root = d3.hierarchy({children: classes})
+							  .sum(function(d) { return d.value; })
+							  .each(function(d) {
+								if (id = d.data.id) {
+								  var id, i = id.lastIndexOf(".");
+								  d.id = id;
+								  d.package = id.slice(0, i);
+								  d.class = id.slice(i + 1);
+								}
+							  });
 
-  node.append("clipPath")
-      .attr("id", function(d) { return d.id; })
-    .append("use")
-      .attr("xlink:href", function(d) { return "#" + d.id; });
+						  var node = svg.selectAll(".node")
+							.data(pack(root).leaves())
+							.enter().append("g")
+							  .attr("class", "node")
+							  .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
-  node.append("text")
-    .attr("clip-path", function(d) { return  d.id; })
-    .selectAll("tspan")
-    .data(function(d) { return d.class.split(/(\s+)/g); })
-    .enter().append("tspan")
-    .attr("x", 0)
-    .attr("y", function(d, i, nodes) { return 14 + (i - nodes.length / 2 - 0.5) * 10; })
-    .text(function(d) { return d; });
+						  node.append("circle")
+							  .attr("id", function(d) { return d.id; })
+							  .attr("r", function(d) { return d.r; })
+							  .style("fill", function(d) { return color(d.value); });
 
-  node.append("title")
-      .text(function(d) { return d.id + "\n" + "Count:" + format(d.value); });
-});
+						  node.append("clipPath")
+							  .attr("id", function(d) { return d.id; })
+							.append("use")
+							  .attr("xlink:href", function(d) { return "#" + d.id; });
 
-</script>
+						  node.append("text")
+							.attr("clip-path", function(d) { return  d.id; })
+							.selectAll("tspan")
+							.data(function(d) { return d.class.split(/(\s+)/g); })
+							.enter().append("tspan")
+							.attr("x", 0)
+							.attr("y", function(d, i, nodes) { return 14 + (i - nodes.length / 2 - 0.5) * 10; })
+							.text(function(d) { return d; });
 
-</head>
+						  node.append("title")
+							  .text(function(d) { return d.id + "\n" + "Count:" + format(d.value); });
+						});
 
-<body>
-
-</body>
+						</script>
 </html>
