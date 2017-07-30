@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.axis text {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 10pt;
+		stroke: #0000;
+      }
+      .axis .label {
+        font-size: 10pt;
+      }
+      .axis path, .axis line {
+        fill: none;
+        stroke: #0000;
+        shape-rendering: crispEdges;
+      }
+      .x.axis text {
+        font-size: 10pt;
+		stroke: #0000;
+      }
+	  
+#tooltip {
+  position: absolute;
+  display: none;
+  min-width: 80px;
+  height: auto;
+  background: none repeat scroll 0 0 #ffffff;
+  border: 1px solid #6F257F;
+  padding: 14px;
+  text-align: center;
+}
+</style>
+
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<div class="barchart1"></div>
+<div id="tooltip"></div>
+<script>
+	var width_1=760, 
+		height_1=500,
+	    svg = d3.select(".barchart1").append("svg")
+	            .attr("width",  width_1)
+                .attr("height", height_1),
+		margin = {top: 20, right: 20, bottom: 30, left: 200},
+		width = +svg.attr("width") - margin.left - margin.right,
+		height = +svg.attr("height") - margin.top - margin.bottom;
+	 
+	var tooltip = d3.select("#tooltip");
+	 
+	var x = d3.scaleLinear().range([0, width]);
+	var y = d3.scaleBand().range([height, 0]);
+
+	var g = svg.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	  
+	d3.csv("barchart_1.csv", function(error, data) {
+		if (error) throw error;
+	  
+		data.sort(function(a, b) { return a.Percentage - b.Percentage; });
+		
+		var colorScale = d3.scaleOrdinal().range(["green", "lightgreen", "orange", "red"]);
+        colorScale.domain(data.map(function (d){ return d.CaseStatus; }));
+	  
+		x.domain([0, d3.max(data, function(d) { return d.Percentage; })]);
+		y.domain(data.map(function(d) { return d.CaseStatus; })).padding(0.1);
+
+		g.append("g")
+			.attr("class", "x axis")
+			.call(d3.axisTop(x));
+
+		g.append("g")
+			.attr("class", "y axis")
+			.call(d3.axisLeft(y));
+
+		g.selectAll(".barchart1")
+			.data(data)
+		    .enter().append("rect")
+			.attr("x", 0)
+			.attr("height", y.bandwidth())
+			.attr("y", function(d) { return y(d.CaseStatus); })
+			.attr("width", function(d) { return x(d.Percentage); })
+			.attr("fill", function (d){ return colorScale(d.CaseStatus); })
+			.on("mousemove", function(d){
+				tooltip
+				  .style("left", d3.event.pageX - 50 + "px")
+				  .style("top", d3.event.pageY - 70 + "px")
+				  .style("display", "inline-block")
+				  .html((d.CaseStatus) + "<br>" + (d.Percentage));
+			})
+				.on("mouseout", function(){ tooltip.style("display", "none");});
+	});
+</script>

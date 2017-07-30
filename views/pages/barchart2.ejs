@@ -43,22 +43,22 @@
       var innerWidth  = outerWidth  - margin.left - margin.right;
       var innerHeight = outerHeight - margin.top  - margin.bottom;
 
-      var svg = d3.select("#barchart2").append("svg")
+      var svg_c4 = d3.select("#barchart2").append("svg")
         .attr("width",  outerWidth)
         .attr("height", outerHeight);
-      var g = svg.append("g")
+      var g_c4 = svg_c4.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-      var xAxisG = g.append("g")
+      var xAxisG = g_c4.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + innerHeight + ")");
-      var yAxisG = g.append("g")
+      var yAxisG = g_c4.append("g")
         .attr("class", "y axis");
 
       
 	  var tooltip2 = d3.select("#tooltip2");
 
 
-      function render(data){
+      function render_c4(data){
 
 	    var xScale = d3.scaleBand().domain(data.map( function (d){ return d[xColumn]; })).range([0, innerWidth], barPadding);
         var yScale = d3.scaleLinear().domain([0, d3.max(data, function (d){ return d[yColumn]; })]).range([innerHeight, 0]);
@@ -72,7 +72,7 @@
 
         yAxisG.call(yAxis);
 
-        var bars = g.selectAll("rect").data(data);
+        var bars = g_c4.selectAll("rect").data(data);
         bars.enter().append("rect")
           .attr("width", xScale.bandwidth())
           .attr("x", function (d){ return xScale(d[xColumn]); })
@@ -90,12 +90,12 @@
         bars.exit().remove();
       }
 
-      function type(d){
+      function type_c4(d){
         d.population = +d.population;
         return d;
       }
 
-      d3.csv("barchart_2.csv", type, render);
+      d3.csv("barchart_2.csv", type_c4, render_c4);
 
 </script>
 
