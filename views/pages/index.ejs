@@ -43,9 +43,7 @@
 	<![endif]-->
 
 	<!-- customized charts for boxplot -->
-	<script src="js/d3x.js"></script>
-	<script src="js/d3plus.js"></script>
-
+	<script src="js/d3x3.js"></script>
 
     <style>
       .axis text {
@@ -67,7 +65,15 @@
         font-size: 10pt;
 		stroke: #FFFFFF;
       }
-	  
+
+	  	.dot {
+	  stroke: #000;
+	}
+
+	#scatter {
+	  font: 11px sans-serif;
+	}
+
     /* #tooltip {
     position: absolute;
 	text-align: center;
@@ -364,34 +370,140 @@
 						<h3>Jump off point in Maritini Glass Visuvalization Structure.</h3>
 						<p><b>Parameters:</b>Wages details for all Jobs with "Data" word in it for each year<br><b>Triggers:</b>Click to expand,mouseover for details,switch between 
 						scatter and box plot,click and drag to filter years</p>
-						<p><a href="/boxplot"> Click to expand & Play </a></p>
-						<div id="viz"></div>
+						<p><a href="/boxplot"> Click to expand & Play </a> - Plot Created using D3 PLUS that enables reader to play with data</p>
+						<p> Scatter Plot with D3 To Satisfy using d3 requirement</p>
+						<div id="tooltip3" style="color:#FFFFFF"></div>
+						<div id="scatter"></div>
 						<script>
-						function render(data){
-						var visualization = d3plus.viz()
-							.container("#viz")
-							.data(data)
-							.type("box")
-							.id(["id","JobTitle","EmployerName"])
-							.x("Year")
-							.y("Wage")
-							.time("Year")
-							.ui([{ 
-								"label": "Visualization Type",
-								"method": "type", 
-								"value": ["scatter","box"]
-							}])
-							.draw()
-						}
-						
-							
-							function type(d){
-								d.Wage = +d.Wage;
-								return d;
-							}
+							var margin_c3 = {top: 20, right: 20, bottom: 30, left: 60},
+								width_c3 = 960 - margin_c3.left - margin_c3.right,
+								height_c3 = 500 - margin_c3.top - margin_c3.bottom;
 
-							
-							d3x.csv("boxplot.csv", type, render);
+							/* 
+							* value accessor - returns the value to encode for a given data object.
+							* scale - maps value to a visual display encoding, such as a pixel position.
+							* map function - maps from data value to display value
+							* axis - sets up axis
+							*/ 
+
+							// setup x 
+							var xValue_c3 = function(d) { return d.Year;}, // data -> value
+								xScale_c3 = d3x3.scale.linear().range([0, width_c3]), // value -> display
+								xMap_c3 = function(d) { return xScale_c3(xValue_c3(d));}, // data -> display
+								xAxis_c3 = d3x3.svg.axis().scale(xScale_c3).orient("bottom");
+
+							// setup y
+							var yValue = function(d) { return d["Wage"];}, // data -> value
+								yScale = d3x3.scale.linear().range([height_c3, 0]), // value -> display
+								yMap = function(d) { return yScale(yValue(d));}, // data -> display
+								yAxis = d3x3.svg.axis().scale(yScale).orient("left");
+
+							// setup fill color
+							var cValue_c3 = function(d) { return d.Year;},
+								color = d3x3.scale.category10();
+
+							// add the graph canvas to the scatter div of the webpage
+							var svg_c3 = d3x3.select("#scatter").append("svg")
+								.attr("width", width_c3 + margin_c3.left + margin_c3.right)
+								.attr("height", height_c3 + margin_c3.top + margin_c3.bottom)
+							.append("g")
+								.attr("transform", "translate(" + margin_c3.left + "," + margin_c3.top + ")");
+
+							// add the tooltip area to the webpage
+							// var tooltip_c3 = d3x3.select("#scatter").append("div")
+							// 	.attr("class", "tooltip_c3")
+							// 	.style("opacity", 0);
+
+							var tooltip_c3 = d3.select("#tooltip3")
+
+							// load data
+							d3x3.csv("boxplot.csv", function(error, data) {
+
+							// change string (from CSV) into number format
+							data.forEach(function(d) {
+								d.Year = +d.Year;
+								d["Wage"] = +d["Wage"];
+							//    console.log(d);
+							});
+
+							// don't want dots overlapping axis, so add in buffer to data domain
+							xScale_c3.domain([d3x3.min(data, xValue_c3)-1, d3x3.max(data, xValue_c3)+1]);
+							yScale.domain([d3x3.min(data, yValue)-1, d3x3.max(data, yValue)+1]);
+
+							// x-axis
+							svg_c3.append("g")
+								.attr("class", "x axis")
+								.attr("transform", "translate(0," + height_c3 + ")")
+								.call(xAxis_c3)
+								.append("text")
+								.attr("class", "label")
+								.attr("x", width_c3)
+								.attr("y", -6)
+								.style("text-anchor", "end")
+								.text("Year");
+
+							// y-axis
+							svg_c3.append("g")
+								.attr("class", "y axis")
+								.call(yAxis)
+								.append("text")
+								.attr("class", "label")
+								.attr("transform", "rotate(-90)")
+								.attr("y", 6)
+								.attr("dy", ".71em")
+								.style("text-anchor", "end")
+								.text("Wage");
+
+							// draw dots
+							svg_c3.selectAll(".dot")
+								.data(data)
+								.enter().append("circle")
+								.attr("class", "dot")
+								.attr("r", 3.5)
+								.attr("cx", xMap_c3)
+								.attr("cy", yMap)
+								.style("fill", function(d) { return color(cValue_c3(d));}) 
+								.on("mouseover", function(d) {
+									tooltip_c3.style("opacity", 1)        
+								   .html(d["EmployerName"] + "," + d["JobTitle"] + "<br/> (" + xValue_c3(d) + ", $" + yValue(d) + ")");
+									//tooltip_c3.transition()
+									//	.duration(200)
+									//	.style("opacity", .9);
+									//tooltip_c3.html(d["EmployerName"] + "," + d["JobTitle"] + "<br/> (" + xValue_c3(d) 
+									//	+ ", $" + yValue(d) + ")")
+										//.style("left", (d3x3.event.pageX + 5) + "px")
+										//.style("top", (d3x3.event.pageY - 28) + "px");
+								})
+								.on("mouseout", function(d) {
+									tooltip_c3.style("opacity", 0)
+									// tooltip_c3.transition()
+									// 	.duration(500)
+									// 	.style("opacity", 0);
+								});
+
+							// draw legend
+							var legend = svg_c3.selectAll(".legend")
+								.data(color.domain())
+								.enter().append("g")
+								.attr("class", "legend")
+								.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+							// draw legend colored rectangles
+							legend.append("rect")
+								.attr("x", width_c3 - 18)
+								.attr("width", 18)
+								.attr("height", 18)
+								.style("fill", color);
+
+							// draw legend text
+							legend.append("text")
+								.attr("x", width_c3 - 24)
+								.attr("y", 9)
+								.attr("dy", ".35em")
+								.style("text-anchor", "end")
+								.text(function(d) { return d;})
+							});
+
 						</script>
 						<p class="sub-heading">It is evident from scatter plots over the year 2011-2016 that the number of data science jobs are increasing exponentially. 
 						[Visually it is clear by seeing number of data points that increases year over year] <br> Median salary fluctuates year over year [Box Plot] and there is no clear trend seen. 
@@ -511,8 +623,7 @@
 				    <p class="to-animate">Bubble Chart Credits <a href="https://bl.ocks.org/mbostock/4063269" target="_blank">Mike Bostock</a> Modified by Somu Palaniappan</a></p>
 					<p class="to-animate">Bar Chart Credits <a href="https://bl.ocks.org/flunky" target="_blank">Prof John C. Hart</a> Modified by Somu Palaniappan</a></p>
 					<p class="to-animate">Box Plot Credits <a href="http://d3plus.org/examples/basic/78018ce8c3787d4e30d9/" target="_blank">Alexandersimoes</a> Modified by Somu Palaniappan</a></p>
-					<p> Searched and worked for weeks to find box plot in d3 package that let the reader to play with (For Martini Glass Structure), After spending weeks of time, ended up using 
-                        d3plus. Used d3 Plus only for Box plot chart mainly for the purpose of achieveing maritin glass structure.</p>
+					<p class="to-animate">Scatter Plot Credits <a href="http://bl.ocks.org/weiglemc/6185069" target="_blank">Michele Weigle</a> Modified by Somu Palaniappan</a></p>
 					<p class="text-center to-animate"><a href="#" class="js-gotop">Go To Top</a></p>
 				</div>
 			</div>

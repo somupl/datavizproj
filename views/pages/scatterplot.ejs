@@ -21,7 +21,7 @@
 	  stroke: #000;
 	}
 
-	.tooltip {
+	.tooltip_c3 {
 	  position: absolute;
 	  width: 200px;
 	  height: 28px;
@@ -29,13 +29,13 @@
 	}
 </style>
 
-<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="js/d3x3.js"></script>
 <div id="scatter"></div>
 
 <script>
-	var margin = {top: 20, right: 20, bottom: 30, left: 60},
-		width = 960 - margin.left - margin.right,
-		height = 500 - margin.top - margin.bottom;
+	var margin_c3 = {top: 20, right: 20, bottom: 30, left: 60},
+		width_c3 = 960 - margin_c3.left - margin_c3.right,
+		height_c3 = 500 - margin_c3.top - margin_c3.bottom;
 
 	/* 
 	 * value accessor - returns the value to encode for a given data object.
@@ -45,35 +45,35 @@
 	 */ 
 
 	// setup x 
-	var xValue = function(d) { return d.Year;}, // data -> value
-		xScale = d3.scale.linear().range([0, width]), // value -> display
-		xMap = function(d) { return xScale(xValue(d));}, // data -> display
-		xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+	var xValue_c3 = function(d) { return d.Year;}, // data -> value
+		xScale_c3 = d3x3.scale.linear().range([0, width_c3]), // value -> display
+		xMap_c3 = function(d) { return xScale_c3(xValue_c3(d));}, // data -> display
+		xAxis_c3 = d3x3.svg.axis().scale(xScale_c3).orient("bottom");
 
 	// setup y
 	var yValue = function(d) { return d["Wage"];}, // data -> value
-		yScale = d3.scale.linear().range([height, 0]), // value -> display
+		yScale = d3x3.scale.linear().range([height_c3, 0]), // value -> display
 		yMap = function(d) { return yScale(yValue(d));}, // data -> display
-		yAxis = d3.svg.axis().scale(yScale).orient("left");
+		yAxis = d3x3.svg.axis().scale(yScale).orient("left");
 
 	// setup fill color
-	var cValue = function(d) { return d.Year;},
-		color = d3.scale.category10();
+	var cValue_c3 = function(d) { return d.Year;},
+		color = d3x3.scale.category10();
 
 	// add the graph canvas to the scatter div of the webpage
-	var svg = d3.select("#scatter").append("svg")
-		.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
+	var svg_c3 = d3x3.select("#scatter").append("svg")
+		.attr("width", width_c3 + margin_c3.left + margin_c3.right)
+		.attr("height", height_c3 + margin_c3.top + margin_c3.bottom)
 	  .append("g")
-		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+		.attr("transform", "translate(" + margin_c3.left + "," + margin_c3.top + ")");
 
 	// add the tooltip area to the webpage
-	var tooltip = d3.select("#scatter").append("div")
-		.attr("class", "tooltip")
+	var tooltip_c3 = d3x3.select("#scatter").append("div")
+		.attr("class", "tooltip_c3")
 		.style("opacity", 0);
 
 	// load data
-	d3.csv("boxplot.csv", function(error, data) {
+	d3x3.csv("boxplot.csv", function(error, data) {
 
 	  // change string (from CSV) into number format
 	  data.forEach(function(d) {
@@ -83,23 +83,23 @@
 	  });
 
 	  // don't want dots overlapping axis, so add in buffer to data domain
-	  xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-	  yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+	  xScale_c3.domain([d3x3.min(data, xValue_c3)-1, d3x3.max(data, xValue_c3)+1]);
+	  yScale.domain([d3x3.min(data, yValue)-1, d3x3.max(data, yValue)+1]);
 
 	  // x-axis
-	  svg.append("g")
+	  svg_c3.append("g")
 		  .attr("class", "x axis")
-		  .attr("transform", "translate(0," + height + ")")
-		  .call(xAxis)
+		  .attr("transform", "translate(0," + height_c3 + ")")
+		  .call(xAxis_c3)
 		.append("text")
 		  .attr("class", "label")
-		  .attr("x", width)
+		  .attr("x", width_c3)
 		  .attr("y", -6)
 		  .style("text-anchor", "end")
 		  .text("Year");
 
 	  // y-axis
-	  svg.append("g")
+	  svg_c3.append("g")
 		  .attr("class", "y axis")
 		  .call(yAxis)
 		.append("text")
@@ -111,31 +111,31 @@
 		  .text("Wage");
 
 	  // draw dots
-	  svg.selectAll(".dot")
+	  svg_c3.selectAll(".dot")
 		  .data(data)
 		.enter().append("circle")
 		  .attr("class", "dot")
 		  .attr("r", 3.5)
-		  .attr("cx", xMap)
+		  .attr("cx", xMap_c3)
 		  .attr("cy", yMap)
-		  .style("fill", function(d) { return color(cValue(d));}) 
+		  .style("fill", function(d) { return color(cValue_c3(d));}) 
 		  .on("mouseover", function(d) {
-			  tooltip.transition()
+			  tooltip_c3.transition()
 				   .duration(200)
 				   .style("opacity", .9);
-			  tooltip.html(d["EmployerName"] + "," + d["JobTitle"] + "<br/> (" + xValue(d) 
+			  tooltip_c3.html(d["EmployerName"] + "," + d["JobTitle"] + "<br/> (" + xValue_c3(d) 
 				+ ", $" + yValue(d) + ")")
-				   .style("left", (d3.event.pageX + 5) + "px")
-				   .style("top", (d3.event.pageY - 28) + "px");
+				   .style("left", (d3x3.event.pageX + 5) + "px")
+				   .style("top", (d3x3.event.pageY - 28) + "px");
 		  })
 		  .on("mouseout", function(d) {
-			  tooltip.transition()
+			  tooltip_c3.transition()
 				   .duration(500)
 				   .style("opacity", 0);
 		  });
 
 	  // draw legend
-	  var legend = svg.selectAll(".legend")
+	  var legend = svg_c3.selectAll(".legend")
 		  .data(color.domain())
 		.enter().append("g")
 		  .attr("class", "legend")
@@ -143,14 +143,14 @@
 
 	  // draw legend colored rectangles
 	  legend.append("rect")
-		  .attr("x", width - 18)
+		  .attr("x", width_c3 - 18)
 		  .attr("width", 18)
 		  .attr("height", 18)
 		  .style("fill", color);
 
 	  // draw legend text
 	  legend.append("text")
-		  .attr("x", width - 24)
+		  .attr("x", width_c3 - 24)
 		  .attr("y", 9)
 		  .attr("dy", ".35em")
 		  .style("text-anchor", "end")

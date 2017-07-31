@@ -10,14 +10,14 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
 app.get('/', function(request, response) {
-  response.render('pages/index2');
+  response.render('pages/index');
 });
 
 app.get('/boxplot', function(request, response) {
   response.render('pages/boxplot');
 });
 
-app.get('/scatterplot', function(request, response) {
+app.get('/scatter', function(request, response) {
   response.render('pages/scatterplot');
 });
 
