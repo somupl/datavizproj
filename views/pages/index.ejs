@@ -143,7 +143,7 @@
 				<p class="text-center to-animate"><a href="https://www.foreignlaborcert.doleta.gov/performancedata.cfm" class="btn btn-primary btn-outline">Data Link</a></p>
 				<p> Data Preparation / Cleaning Using R Language --> <a href="https://github.com/sharan-naribole/H1B_visa_eda/blob/master/data_processing.md"> Courtesy </a></p>
 				<p> Final project is the exact same rendition of MidTerm Project Using D3 <br> Midterm Project rendered using <a href="https://public.tableau.com/profile/somu.palaniappan#!/vizhome/CS498-DataViz-MidtermProject/Description"> Tableau </a></p>
-				<p> Adopted Martini Glass Visualization structure, mentioned the jump off point in the story, and streamlined the readers in one direction to finish the story </p>
+				<p> Adopted Interactive Slide Show Visualization structure to convey the message </p>
 				<p> Join me in the journey of finding out answers to below questions using Data Visuvalization </p>
 			</div>
 		</div>
@@ -367,146 +367,139 @@
 				<div class="row text-center fh5co-heading row-padded">
 					<div class="col-md-8 col-md-offset-2 to-animate">
 						<h2 class="heading">Data Science Job Trends</h2>
-						<h3>Jump off point in Maritini Glass Visuvalization Structure.</h3>
-						<p><b>Parameters:</b>Wages details for all Jobs with "Data" word in it for each year<br><b>Triggers:</b>Click to expand,mouseover for details,switch between 
-						scatter and box plot,click and drag to filter years</p>
-						<p><a href="/boxplot"> Click to expand & Play </a> - Plot Created using D3 PLUS that enables reader to play with data</p>
-						<p> Scatter Plot with D3 To Satisfy using d3 requirement</p>
-						<div id="tooltip3" style="color:#FFFFFF"></div>
+						<p><b>Parameters:</b>Wages details for all Jobs with "Data" word in it for each year<br><b>Triggers:</b>mouseover for details</p>
+						<div id="tooltip3" style="color:#FFFFFF; height: 50px"></div>
 						<div id="scatter"></div>
 						<script>
-							var margin_c3 = {top: 20, right: 20, bottom: 30, left: 60},
-								width_c3 = 960 - margin_c3.left - margin_c3.right,
-								height_c3 = 500 - margin_c3.top - margin_c3.bottom;
+						var margin_c3 = {top: 20, right: 20, bottom: 30, left: 60},
+							width_c3 = 960 - margin_c3.left - margin_c3.right,
+							height_c3 = 500 - margin_c3.top - margin_c3.bottom;
 
-							/* 
-							* value accessor - returns the value to encode for a given data object.
-							* scale - maps value to a visual display encoding, such as a pixel position.
-							* map function - maps from data value to display value
-							* axis - sets up axis
-							*/ 
+						/* 
+						* value accessor - returns the value to encode for a given data object.
+						* scale - maps value to a visual display encoding, such as a pixel position.
+						* map function - maps from data value to display value
+						* axis - sets up axis
+						*/ 
 
-							// setup x 
-							var xValue_c3 = function(d) { return d.Year;}, // data -> value
-								xScale_c3 = d3x3.scale.linear().range([0, width_c3]), // value -> display
-								xMap_c3 = function(d) { return xScale_c3(xValue_c3(d));}, // data -> display
-								xAxis_c3 = d3x3.svg.axis().scale(xScale_c3).orient("bottom");
+						// setup x 
+						var xValue_c3 = function(d) { return d.Year;}, // data -> value
+							xScale_c3 = d3x3.scale.linear().range([0, width_c3]), // value -> display
+							xMap_c3 = function(d) { return xScale_c3(xValue_c3(d));}, // data -> display
+							xAxis_c3 = d3x3.svg.axis().scale(xScale_c3).orient("bottom");
 
-							// setup y
-							var yValue = function(d) { return d["Wage"];}, // data -> value
-								yScale = d3x3.scale.linear().range([height_c3, 0]), // value -> display
-								yMap = function(d) { return yScale(yValue(d));}, // data -> display
-								yAxis = d3x3.svg.axis().scale(yScale).orient("left");
+						// setup y
+						var yValue_c3 = function(d) { return d["Wage"];}, // data -> value
+							yScale_c3 = d3x3.scale.linear().range([height_c3, 0]), // value -> display
+							yMap_c3 = function(d) { return yScale_c3(yValue_c3(d));}, // data -> display
+							yAxis_c3 = d3x3.svg.axis().scale(yScale_c3).orient("left");
 
-							// setup fill color
-							var cValue_c3 = function(d) { return d.Year;},
-								color = d3x3.scale.category10();
+						// setup fill color
+						var cValue_c3 = function(d) { return d.Year;},
+							color_c3 = d3x3.scale.category10();
 
-							// add the graph canvas to the scatter div of the webpage
-							var svg_c3 = d3x3.select("#scatter").append("svg")
-								.attr("width", width_c3 + margin_c3.left + margin_c3.right)
-								.attr("height", height_c3 + margin_c3.top + margin_c3.bottom)
-							.append("g")
-								.attr("transform", "translate(" + margin_c3.left + "," + margin_c3.top + ")");
+						// add the graph canvas to the scatter div of the webpage
+						var svg_c3 = d3x3.select("#scatter").append("svg")
+							.attr("width", width_c3 + margin_c3.left + margin_c3.right)
+							.attr("height", height_c3 + margin_c3.top + margin_c3.bottom)
+						.append("g")
+							.attr("transform", "translate(" + margin_c3.left + "," + margin_c3.top + ")");
 
-							// add the tooltip area to the webpage
-							// var tooltip_c3 = d3x3.select("#scatter").append("div")
-							// 	.attr("class", "tooltip_c3")
-							// 	.style("opacity", 0);
+						// add the tooltip area to the webpage
+						var tooltip_c3 = d3x3.select("#tooltip3");
 
-							var tooltip_c3 = d3.select("#tooltip3")
+						// load data
+						d3x3.csv("boxplot.csv", function(error, data) {
 
-							// load data
-							d3x3.csv("boxplot.csv", function(error, data) {
+						// change string (from CSV) into number format
+						data.forEach(function(d) {
+							d.Year = +d.Year;
+							d["Wage"] = +d["Wage"];
+						//    console.log(d);
+						});
 
-							// change string (from CSV) into number format
-							data.forEach(function(d) {
-								d.Year = +d.Year;
-								d["Wage"] = +d["Wage"];
-							//    console.log(d);
-							});
+						// don't want dots overlapping axis, so add in buffer to data domain
+						xScale_c3.domain([d3x3.min(data, xValue_c3)-1, d3x3.max(data, xValue_c3)+1]);
+						yScale_c3.domain([d3x3.min(data, yValue_c3)-1, d3x3.max(data, yValue_c3)+1]);
 
-							// don't want dots overlapping axis, so add in buffer to data domain
-							xScale_c3.domain([d3x3.min(data, xValue_c3)-1, d3x3.max(data, xValue_c3)+1]);
-							yScale.domain([d3x3.min(data, yValue)-1, d3x3.max(data, yValue)+1]);
+						// x-axis
+						svg_c3.append("g")
+							.attr("class", "x axis")
+							.attr("transform", "translate(0," + height_c3 + ")")
+							.call(xAxis_c3)
+							.append("text")
+							.attr("class", "label")
+							.attr("x", width_c3)
+							.attr("y", -6)
+							.style("text-anchor", "end")
+							.text("Year");
 
-							// x-axis
-							svg_c3.append("g")
-								.attr("class", "x axis")
-								.attr("transform", "translate(0," + height_c3 + ")")
-								.call(xAxis_c3)
-								.append("text")
-								.attr("class", "label")
-								.attr("x", width_c3)
-								.attr("y", -6)
-								.style("text-anchor", "end")
-								.text("Year");
+						// y-axis
+						svg_c3.append("g")
+							.attr("class", "y axis")
+							.call(yAxis_c3)
+							.append("text")
+							.attr("class", "label")
+							.attr("transform", "rotate(-90)")
+							.attr("y", 6)
+							.attr("dy", ".71em")
+							.style("text-anchor", "end")
+							.text("Wage");
 
-							// y-axis
-							svg_c3.append("g")
-								.attr("class", "y axis")
-								.call(yAxis)
-								.append("text")
-								.attr("class", "label")
-								.attr("transform", "rotate(-90)")
-								.attr("y", 6)
-								.attr("dy", ".71em")
-								.style("text-anchor", "end")
-								.text("Wage");
+						// draw dots
+						svg_c3.selectAll(".dot")
+							.data(data)
+							.enter().append("circle")
+							.attr("class", "dot")
+							.attr("r", 3.5)
+							.attr("cx", xMap_c3)
+							.attr("cy", yMap_c3)
+							.style("fill", function(d) { return color_c3(cValue_c3(d));}) 
+							.on("mouseover", function(d) {
+														tooltip_c3.style("opacity", 1)        
+													.html(d["EmployerName"] + "," + d["JobTitle"] + "<br/> (" + xValue_c3(d) + ", $" + yValue_c3(d) + ")");
+														//tooltip_c3.transition()
+														//	.duration(200)
+														//	.style("opacity", .9);
+														//tooltip_c3.html(d["EmployerName"] + "," + d["JobTitle"] + "<br/> (" + xValue_c3(d) 
+														//	+ ", $" + yValue(d) + ")")
+															//.style("left", (d3x3.event.pageX + 5) + "px")
+															//.style("top", (d3x3.event.pageY - 28) + "px");
+													})
+													.on("mouseout", function(d) {
+														tooltip_c3.style("opacity", 0)
+														// tooltip_c3.transition()
+														// 	.duration(500)
+														// 	.style("opacity", 0);
+													});
 
-							// draw dots
-							svg_c3.selectAll(".dot")
-								.data(data)
-								.enter().append("circle")
-								.attr("class", "dot")
-								.attr("r", 3.5)
-								.attr("cx", xMap_c3)
-								.attr("cy", yMap)
-								.style("fill", function(d) { return color(cValue_c3(d));}) 
-								.on("mouseover", function(d) {
-									tooltip_c3.style("opacity", 1)        
-								   .html(d["EmployerName"] + "," + d["JobTitle"] + "<br/> (" + xValue_c3(d) + ", $" + yValue(d) + ")");
-									//tooltip_c3.transition()
-									//	.duration(200)
-									//	.style("opacity", .9);
-									//tooltip_c3.html(d["EmployerName"] + "," + d["JobTitle"] + "<br/> (" + xValue_c3(d) 
-									//	+ ", $" + yValue(d) + ")")
-										//.style("left", (d3x3.event.pageX + 5) + "px")
-										//.style("top", (d3x3.event.pageY - 28) + "px");
-								})
-								.on("mouseout", function(d) {
-									tooltip_c3.style("opacity", 0)
-									// tooltip_c3.transition()
-									// 	.duration(500)
-									// 	.style("opacity", 0);
-								});
+						// draw legend
+						var legend_c3 = svg_c3.selectAll(".legend")
+							.data(color_c3.domain())
+							.enter().append("g")
+							.attr("class", "legend")
+							.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
-							// draw legend
-							var legend = svg_c3.selectAll(".legend")
-								.data(color.domain())
-								.enter().append("g")
-								.attr("class", "legend")
-								.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+						// draw legend colored rectangles
+						legend_c3.append("rect")
+							.attr("x", width_c3 - 18)
+							.attr("width", 18)
+							.attr("height", 18)
+							.style("fill", color_c3);
 
-							// draw legend colored rectangles
-							legend.append("rect")
-								.attr("x", width_c3 - 18)
-								.attr("width", 18)
-								.attr("height", 18)
-								.style("fill", color);
+						// draw legend text
+						legend_c3.append("text")
+							.attr("x", width_c3 - 24)
+							.attr("y", 9)
+							.attr("dy", ".35em")
+							.style("text-anchor", "end")
+							.style("color", "#FFFFFF")
+							.text(function(d) { return d;})
+						});
 
-							// draw legend text
-							legend.append("text")
-								.attr("x", width_c3 - 24)
-								.attr("y", 9)
-								.attr("dy", ".35em")
-								.style("text-anchor", "end")
-								.text(function(d) { return d;})
-							});
-
-						</script>
+					</script>
 						<p class="sub-heading">It is evident from scatter plots over the year 2011-2016 that the number of data science jobs are increasing exponentially. 
-						[Visually it is clear by seeing number of data points that increases year over year] <br> Median salary fluctuates year over year [Box Plot] and there is no clear trend seen. 
+						[Visually it is clear by seeing number of data points that increases year over year] <br> Median salary fluctuates year over year and there is no clear trend seen. 
 						Lower end salaries are because the data includes part time jobs.</p>
 					</div>
 				</div>
@@ -518,7 +511,6 @@
 				<div class="row text-center fh5co-heading row-padded">
 					<div class="col-md-8 col-md-offset-2">
 						<h2 class="heading to-animate">Top Data Science Job Recruiters</h2>
-						<h3>Streamlining the readers towards conclusion</h3>
 						<p><b>Parameters:</b>count of Employer who recruited for jobs with "Data" word in it for the year 2016<br><b>Triggers:</b>Mouse over</p>
 						<!-- grpah code goes here-->						
 						<div id="tooltip2"></div>
@@ -603,7 +595,7 @@
 					</div>
 					<div class="col-md-6 to-animate-2">
 						<h3>Narrative Visualization Summary</h3>
-						<h4>Adopted Martini Glass Visuvalization</h4>
+						<h4>Adopted Interactive Slide Show Visuvalization</h4>
 						<li> <b>Scenes</b> are used in the form of scrolling slides </li>
 						<li> <b>Annotations</b> are mostly in the form of tool tip and axis</li>
 						<li> <b>Parameters</b> are specified for each chart </li>
